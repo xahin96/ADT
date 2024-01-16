@@ -1,0 +1,21 @@
+FROM python:3.8-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# Install GCC and other necessary build tools
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up the working directory
+RUN mkdir /code
+WORKDIR /code
+
+# Copy and install Python dependencies
+COPY requirements.txt /code/
+RUN pip install -r requirements.txt
+
+# Copy the rest of the application code
+COPY . /code/
