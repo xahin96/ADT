@@ -26,9 +26,10 @@ jobs:
       run: |
         pwd
         ls -la
+        find . -name 'requirements.txt'
 
     - name: Set Working Directory
-      run: cd $GITHUB_WORKSPACE  # Use $GITHUB_WORKSPACE to refer to the root of the repository
+      run: cd $GITHUB_WORKSPACE
 
     - name: Install Dependencies
       run: |
