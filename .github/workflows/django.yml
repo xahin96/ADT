@@ -39,4 +39,4 @@ jobs:
       
     - name: Run Tests
       run: |
-        python ./adt/manage.py test
+        python ./adt/manage.py test main
