@@ -5,5 +5,4 @@ from django.urls import include, path
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('datamining/', include('datamining.urls')),
-    # other URL patterns for your project
 ]
