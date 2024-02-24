@@ -12,10 +12,10 @@ from your_app_name.models import CarInfoModel
 def read_excel_and_insert_to_db(folder_path, v_type):
     # Iterate over each file in the folder
     for file_name in os.listdir(folder_path):
-        if file_name.endswith('.xlsx'):
+        if file_name.endswith('.csv'):
             file_path = os.path.join(folder_path, file_name)
-            # Read Excel file into a pandas DataFrame
-            df = pd.read_excel(file_path)
+            # Read CSV file into a pandas DataFrame
+            df = pd.read_csv(file_path)
 
             # Iterate over each row in the DataFrame
             for index, row in df.iterrows():
@@ -50,7 +50,7 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                 # Save the instance to the database
                 car_info.save()
 
-# Call the function with the path to your folder containing Excel files
+# Call the function with the path to your folder containing CSV files
 read_excel_and_insert_to_db("../../data/BEV", "BEV")
 read_excel_and_insert_to_db("../../data/PHEV", "PHEV")
 read_excel_and_insert_to_db("../../data/Conventional", "Conventional")
