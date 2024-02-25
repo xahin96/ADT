@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+import dotenv
+from dotenv import dotenv_values
+
 import os
 
 
@@ -78,14 +81,16 @@ WSGI_APPLICATION = 'adt.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+config = dotenv_values('.env')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_NAME'),
-        'USER': os.environ.get('POSTGRES_USER'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
-        'HOST': 'db',
-        'PORT': 5432,
+        'NAME': config['POSTGRES_NAME'],
+        'USER': config['POSTGRES_USER'],
+        'PASSWORD': config['POSTGRES_PASSWORD'],
+        'HOST': config['POSTGRES_HOST'],
+        'PORT': config['POSTGRES_PORT'],
     },
     "nonrel": {
         "ENGINE": "djongo",
