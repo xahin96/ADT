@@ -58,9 +58,15 @@ def datamining_page(request):
 
 
 def load_data(request):
-    read_excel_and_insert_to_db("../../data/BEV", "BEV")
-    read_excel_and_insert_to_db("../../data/PHEV", "PHEV")
-    read_excel_and_insert_to_db("../../data/Conventional", "Conventional")
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    bev_directory = os.path.join(current_directory, 'data', 'BEV')
+    phev_directory = os.path.join(current_directory, 'data', 'BEV')
+    conventional_directory = os.path.join(current_directory, 'data', 'BEV')
+    print(bev_directory)
+
+    read_excel_and_insert_to_db(bev_directory, "BEV")
+    read_excel_and_insert_to_db(phev_directory, "PHEV")
+    read_excel_and_insert_to_db(conventional_directory, "Conventional")
 
 
 def read_excel_and_insert_to_db(folder_path, v_type):

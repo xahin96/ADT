@@ -147,3 +147,4 @@ data/
 # Ignore .idea directory and its contents
 .idea/
 ../.idea/
+.DS_Store
