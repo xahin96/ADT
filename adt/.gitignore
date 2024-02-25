@@ -149,3 +149,8 @@ data/
 ../.idea/
 .DS_Store
 adt/.DS_Store
+
+
+*.DS_Store
+.idea/workspace.xml
+adt/.DS_Store
