@@ -1,3 +1,5 @@
+myvenv
+.idea
 myvenvecho .idea/
 echo adt/.idea/
 
