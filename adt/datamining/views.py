@@ -53,3 +53,7 @@ def datamining_page(request):
     context = {'fig_html': fig_html}
 
     return render(request, 'datamining/datamining_page.html', context)
+
+
+def load_data(request):
+    pass
