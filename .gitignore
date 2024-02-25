@@ -1,6 +1,8 @@
 myvenv
 .idea
 .DS_Store
+adt/.DS_Store
+
 myvenvecho .idea/
 echo adt/.idea/
 
