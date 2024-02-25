@@ -1,1 +1,2 @@
-myvenv
+myvenvecho .idea/
+echo adt/.idea/
