@@ -146,3 +146,4 @@ data/
 **/migrations/*.py
 
 *.DS_Store
+.idea/workspace.xml
