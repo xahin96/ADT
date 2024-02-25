@@ -144,3 +144,5 @@ data/
 
 # ignore migtarions file
 **/migrations/*.py
+
+*.DS_Store

@@ -1,2 +1,3 @@
 myvenvecho .idea/
 echo adt/.idea/
+*.DS_Store
