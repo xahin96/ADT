@@ -144,3 +144,5 @@ data/
 
 # ignore migtarions file
 **/migrations/*.py
+# Ignore .idea directory and its contents
+.idea/
