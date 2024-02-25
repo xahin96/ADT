@@ -10,3 +10,7 @@ myvenv
 .idea
 .DS_Store
 adt/.DS_Store
+
+.idea/**
+.idea/
+.*.*
