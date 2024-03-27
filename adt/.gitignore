@@ -144,7 +144,7 @@ data/
 
 # ignore migtarions file
 **/migrations/*.py
-<<<<<<< HEAD
+
 # Ignore .idea directory and its contents
 .idea/
 ../.idea/
@@ -159,8 +159,6 @@ adt/.DS_Store
 .idea/**
 .idea/
 .*.*
-=======
 
 *.DS_Store
 .idea/workspace.xml
->>>>>>> main
