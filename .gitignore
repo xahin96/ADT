@@ -14,3 +14,8 @@ adt/.DS_Store
 .idea/**
 .idea/
 .*.*
+
+myvenvecho .idea/
+echo adt/.idea/
+*.DS_Store
+.idea/workspace.xml
