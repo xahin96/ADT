@@ -7,7 +7,10 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 import pandas as pd
-from datamining.models import CarInfoModel
+from .models import CarInfoModel
+from django.conf import settings
+from pathlib import Path
+import numpy as np  # Import numpy for NaN handling
 
 
 def datamining_page(request):
@@ -58,15 +61,14 @@ def datamining_page(request):
 
 
 def load_data(request):
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    bev_directory = os.path.join(current_directory, 'data', 'BEV')
-    phev_directory = os.path.join(current_directory, 'data', 'BEV')
-    conventional_directory = os.path.join(current_directory, 'data', 'BEV')
-    print(bev_directory)
+    data_dir = Path(settings.BASE_DIR) / 'datamining' / 'data'
+    bev_folder = data_dir / "BEV"
+    phev_folder = data_dir / "PHEV"
+    conventional_folder = data_dir / "Conventional"
 
-    read_excel_and_insert_to_db(bev_directory, "BEV")
-    read_excel_and_insert_to_db(phev_directory, "PHEV")
-    read_excel_and_insert_to_db(conventional_directory, "Conventional")
+    read_excel_and_insert_to_db(bev_folder, "BEV")
+    read_excel_and_insert_to_db(phev_folder, "PHEV")
+    read_excel_and_insert_to_db(conventional_folder, "Conventional")
 
 
 def read_excel_and_insert_to_db(folder_path, v_type):
@@ -77,34 +79,61 @@ def read_excel_and_insert_to_db(folder_path, v_type):
             # Read CSV file into a pandas DataFrame
             df = pd.read_csv(file_path)
 
+            columns_to_check = [
+                'Highway (L/100 km)',
+                'Combined (L/100 km)',
+                'Motor (kW)',
+                'City (kWh/100 km)',
+                'Highway (kWh/100 km)',
+                'Combined (kWh/100 km)',
+                'combined_PHEV',
+                'smog_rating'  # Add 'smog_rating' to columns_to_check
+            ]
+
+            for column_name in columns_to_check:
+                if column_name not in df.columns:
+                    df[column_name] = None
+
+            # Check if the 'Fuel type' column exists
+            fuel_type_column = 'Fuel type 1' if v_type == 'PHEV' else 'Fuel type'
+            if fuel_type_column not in df.columns:
+                df[fuel_type_column] = None
+
             # Iterate over each row in the DataFrame
             for index, row in df.iterrows():
+                # Replace NaN values with None
+                row = row.replace({np.nan: None})
+
+                # Split the combined_PHEV value by space
+                combined_phev_value = row['combined_PHEV'].split()[0] if isinstance(row['combined_PHEV'], str) else None
+                combined_kwh_value = row['combined_PHEV'].split('(')[-1].split(' ')[0] if isinstance(row['combined_PHEV'], str) else None
+
                 # Create a new instance of your Django model
                 car_info = CarInfoModel(
                     model_year=row['Model year'],
                     make=row['Make'],
                     car_model=row['Model'],
                     vehicle_class=row['Vehicle class'],
-                    engine_size=row['Engine size (L)'],
-                    cylinders=row['Cylinders'],
-                    transmission=row['Transmission'],
-                    fuel_type=row['Fuel Type'],
-                    city=row['City (L/100 km)'],
-                    highway=row['Highway (L/100 km)'],
-                    combined=row['Combined (L/100 km)'],
-                    combined_mpg=row['Combined (mpg)'],
-                    CO2_Emission=row['CO2 emissions (g/km)'],
-                    CO2_Rating=row['CO2 rating'],
-                    smog_rating=row['Smog rating'],
-                    motor=row['Motor (kW)'],
-                    city_kWh=row['City (kWh/100 km)'],
-                    highway_kWh=row['Highway (kWh/100 km)'],
-                    combined_kWh=row['Combined (kWh/100 km)'],
-                    range=row['Range 1 (km)'],
-                    recharge_time=row['Recharge time (h)'],
-                    fuel_type2=row['Fuel type 2'],
-                    range2=row['Range 2 (km)'],
-                    combined_PHEV=row['Combined Le/100 km'],
+                    engine_size=row.get('Engine size (L)'),
+                    cylinders=row.get('Cylinders'),
+                    transmission=row.get('Transmission'),
+                    fuel_type=row[fuel_type_column],
+                    fuel_type2=row.get('Fuel type 2') if v_type == "PHEV" else None,
+                    city=row.get('City (L/100 km)'),
+                    highway=row.get('Highway (L/100 km)'),
+                    combined=row.get('Combined (L/100 km)'),
+                    combined_mpg=row.get('Combined (mpg)'),
+                    CO2_Emission=row.get('CO2 emissions (g/km)'),
+                    CO2_Rating=row.get('CO2 rating'),
+                    smog_rating=row.get('Smog rating'),  # Ensure 'Smog rating' column exists in CSV
+                    motor=row.get('Motor (kW)'),
+                    city_kWh=row.get('City (kWh/100 km)'),
+                    highway_kWh=row.get('Highway (kWh/100 km)'),
+                    combined_kWh=row.get('Combined (kWh/100 km)'),
+                    range=row.get('Range 1 (km)'),
+                    recharge_time=row.get('Recharge time (h)'),
+                    range2=row.get('Range 2 (km)'),
+                    combined_PHEV=combined_phev_value,  # Assign split value to combined_PHEV
                     vehicle_type=v_type
                 )
                 # Save the instance to the database
