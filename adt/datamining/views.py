@@ -12,6 +12,9 @@ from django.conf import settings
 from pathlib import Path
 import numpy as np  # Import numpy for NaN handling
 
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 def datamining_page(request):
     # Your logic here
@@ -138,3 +141,29 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                 )
                 # Save the instance to the database
                 car_info.save()
+
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+def dashboard(request):
+    car_infos = CarInfoModel.objects.all()
+
+    make = request.GET.get('make')
+    model_year = request.GET.get('model_year')
+
+    if make:
+        car_infos = car_infos.filter(make__icontains=make)
+    if model_year:
+        car_infos = car_infos.filter(model_year=model_year)
+
+    # Paginate the filtered queryset
+    paginator = Paginator(car_infos, 10)  # 10 items per page
+    page = request.GET.get('page')
+    try:
+        car_infos = paginator.page(page)
+    except PageNotAnInteger:
+        car_infos = paginator.page(1)
+    except EmptyPage:
+        car_infos = paginator.page(paginator.num_pages)
+
+    return render(request, 'datamining/dashboard.html', {'car_infos': car_infos})
