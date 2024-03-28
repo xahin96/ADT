@@ -16,7 +16,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.http import HttpResponse
 
 def datamining_page(request):
     # Your logic here
@@ -66,6 +66,8 @@ def datamining_page(request):
 
 
 def load_data(request):
+    CarInfoModel.objects.all().delete()
+
     data_dir = Path(settings.BASE_DIR) / 'datamining' / 'data'
     bev_folder = data_dir / "BEV"
     phev_folder = data_dir / "PHEV"
@@ -77,12 +79,13 @@ def load_data(request):
 
 
 def read_excel_and_insert_to_db(folder_path, v_type):
+
     # Iterate over each file in the folder
     for file_name in os.listdir(folder_path):
         if file_name.endswith('.csv'):
             file_path = os.path.join(folder_path, file_name)
             # Read CSV file into a pandas DataFrame
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file_path, encoding='ISO-8859-1')
 
             columns_to_check = [
                 'Highway (L/100 km)',
@@ -143,6 +146,8 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                 )
                 # Save the instance to the database
                 car_info.save()
+
+    return HttpResponse({"msg":"OK"}, status=200)
 
 
 def dashboard(request):

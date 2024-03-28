@@ -19,6 +19,8 @@
 > python manage.py makemigrations
 
 > python manage.py migrate
+>
+> python manage.py createsuperuser
 
 # Go to 0.0.0.0:8000/datamining
 **The landing page will show up**
