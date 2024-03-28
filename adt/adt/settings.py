@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ['0.0.0.0',  '127.0.0.1']
 INSTALLED_APPS = [
     'main',
     'datamining',
+    'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -59,7 +60,11 @@ ROOT_URLCONF = 'adt.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            # Add the path to your custom template directory
+            os.path.join(BASE_DIR, 'templates'),  # Default templates directory
+            os.path.join(BASE_DIR, 'datamining', 'templates'),  # Custom templates directory
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

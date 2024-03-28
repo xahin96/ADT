@@ -1,3 +1,20 @@
+myvenv
+.idea
+.DS_Store
+adt/.DS_Store
+
+myvenvecho .idea/
+echo adt/.idea/
+
+myvenv
+.idea
+.DS_Store
+adt/.DS_Store
+
+.idea/**
+.idea/
+.*.*
+
 myvenvecho .idea/
 echo adt/.idea/
 *.DS_Store
