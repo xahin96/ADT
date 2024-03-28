@@ -1,0 +1,119 @@
+<!-- select-car.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Car Information Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Car Information Dashboard</h2>
+    <!-- Filtering Form -->
+    <form method="GET" class="form-inline mb-4">
+        <div class="form-group mr-2">
+            <label for="make">Make:</label>
+            <input type="text" class="form-control" id="make" name="make" value="{{ request.GET.make }}">
+        </div>
+        <div class="form-group mr-2">
+            <label for="model_year">Model Year:</label>
+            <input type="number" class="form-control" id="model_year" name="model_year" value="{{ request.GET.model_year }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+    <!-- End Filtering Form -->
+
+    <!-- Display Filtered Results -->
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <!-- Table headers -->
+            <thead class="thead-dark">
+                <tr>
+                    <th>Select</th>
+                    <th>Model Year</th>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Vehicle Class</th>
+                    <th>Engine Size</th>
+                    <th>Cylinders</th>
+                    <th>Transmission</th>
+                    <th>Fuel Type</th>
+                    <th>City (L/100 km)</th>
+                    <th>Highway (L/100 km)</th>
+                    <th>Combined (L/100 km)</th>
+                    <th>Combined (mpg)</th>
+                    <th>CO2 Emission (g/km)</th>
+                    <th>CO2 Rating</th>
+                    <th>Smog Rating</th>
+                    <th>Motor (kW)</th>
+                    <th>City (kWh/100 km)</th>
+                    <th>Highway (kWh/100 km)</th>
+                    <th>Combined (kWh/100 km)</th>
+                    <th>Range 1 (km)</th>
+                    <th>Recharge Time (h)</th>
+                    <th>Fuel Type 2</th>
+                    <th>Range 2 (km)</th>
+                    <th>Combined PHEV (Le/100 km)</th>
+                    <th>Vehicle Type</th>
+                </tr>
+            </thead>
+            <!-- Table body -->
+            <tbody>
+                {% for car_info in car_infos %}
+                <tr>
+                    <td><a href="{% url 'car_details' car_info.id %}" class="btn btn-primary">Select</a></td>
+                    <td>{{ car_info.model_year }}</td>
+                    <td>{{ car_info.make }}</td>
+                    <td>{{ car_info.car_model }}</td>
+                    <td>{{ car_info.vehicle_class }}</td>
+                    <td>{{ car_info.engine_size }}</td>
+                    <td>{{ car_info.cylinders }}</td>
+                    <td>{{ car_info.transmission }}</td>
+                    <td>{{ car_info.fuel_type }}</td>
+                    <td>{{ car_info.city }}</td>
+                    <td>{{ car_info.highway }}</td>
+                    <td>{{ car_info.combined }}</td>
+                    <td>{{ car_info.combined_mpg }}</td>
+                    <td>{{ car_info.CO2_Emission }}</td>
+                    <td>{{ car_info.CO2_Rating }}</td>
+                    <td>{{ car_info.smog_rating }}</td>
+                    <td>{{ car_info.motor }}</td>
+                    <td>{{ car_info.city_kWh }}</td>
+                    <td>{{ car_info.highway_kWh }}</td>
+                    <td>{{ car_info.combined_kWh }}</td>
+                    <td>{{ car_info.range }}</td>
+                    <td>{{ car_info.recharge_time }}</td>
+                    <td>{{ car_info.fuel_type2 }}</td>
+                    <td>{{ car_info.range2 }}</td>
+                    <td>{{ car_info.combined_PHEV }}</td>
+                    <td>{{ car_info.vehicle_type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- End Display Filtered Results -->
+
+    <!-- Pagination -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if car_infos.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1{% if request.GET.make %}&make={{ request.GET.make }}{% endif %}{% if request.GET.model_year %}&model_year={{ request.GET.model_year }}{% endif %}">&laquo; First</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ car_infos.previous_page_number }}{% if request.GET.make %}&make={{ request.GET.make }}{% endif %}{% if request.GET.model_year %}&model_year={{ request.GET.model_year }}{% endif %}">Previous</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">&laquo; First</span></li>
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            <li class="page-item disabled"><span class="page-link">Page {{ car_infos.number }} of {{ car_infos.paginator.num_pages }}</span></li>
+
+            {% if car_infos.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ car_infos.next_page_number }}{% if request.GET.make %}&make={{ request.GET.make }}{% endif %}{% if request.GET.model_year %}&model_year={{ request.GET.model_year }}{% endif %}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ car_infos.paginator.num_pages }}{% if request.GET.make %}&make={{ request.GET.make }}{% endif %}{% if request.GET.model_year %}&model_year={{ request.GET.model_year }}{% endif %}">Last &raquo;</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                <li class="page-item disabled"><span class="page-link">Last &raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    <!-- End Pagination -->
+</div>
+{% endblock %}

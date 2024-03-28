@@ -14,6 +14,8 @@ import numpy as np  # Import numpy for NaN handling
 
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def datamining_page(request):
@@ -58,7 +60,7 @@ def datamining_page(request):
     plt.close()
 
     # Pass the HTML to the template context
-    context = {'fig_html': fig_html}
+    context = {'fig_html': x}
 
     return render(request, 'datamining/datamining_page.html', context)
 
@@ -143,8 +145,6 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                 car_info.save()
 
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 def dashboard(request):
     car_infos = CarInfoModel.objects.all()
 
@@ -167,3 +167,31 @@ def dashboard(request):
         car_infos = paginator.page(paginator.num_pages)
 
     return render(request, 'datamining/dashboard.html', {'car_infos': car_infos})
+
+
+def select_car(request):
+    car_infos = CarInfoModel.objects.all()
+
+    make = request.GET.get('make')
+    model_year = request.GET.get('model_year')
+
+    if make:
+        car_infos = car_infos.filter(make__icontains=make)
+    if model_year:
+        car_infos = car_infos.filter(model_year=model_year)
+
+    # Paginate the filtered queryset
+    paginator = Paginator(car_infos, 10)  # 10 items per page
+    page = request.GET.get('page')
+    try:
+        car_infos = paginator.page(page)
+    except PageNotAnInteger:
+        car_infos = paginator.page(1)
+    except EmptyPage:
+        car_infos = paginator.page(paginator.num_pages)
+    return render(request, 'datamining/select-car.html', {'car_infos': car_infos})
+
+
+def car_details(request, car_id):
+    car_info = get_object_or_404(CarInfoModel, id=car_id)
+    return render(request, 'datamining/car_details.html', {'car_info': car_info})
