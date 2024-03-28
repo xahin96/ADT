@@ -1,0 +1,18 @@
+<!-- car_details.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Car Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Car Details</h2>
+    <div>
+        <p><strong>Model Year:</strong> {{ car_info.model_year }}</p>
+        <p><strong>Make:</strong> {{ car_info.make }}</p>
+        <p><strong>Model:</strong> {{ car_info.car_model }}</p>
+        <p><strong>Vehicle Class:</strong> {{ car_info.vehicle_class }}</p>
+        <!-- Add other fields as needed -->
+    </div>
+</div>
+{% endblock %}
