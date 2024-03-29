@@ -16,6 +16,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.http import HttpResponse
 import random
 
 
@@ -67,6 +68,8 @@ def datamining_page(request):
 
 
 def load_data(request):
+    CarInfoModel.objects.all().delete()
+
     data_dir = Path(settings.BASE_DIR) / 'datamining' / 'data'
     bev_folder = data_dir / "BEV"
     phev_folder = data_dir / "PHEV"
@@ -76,14 +79,27 @@ def load_data(request):
     read_excel_and_insert_to_db(phev_folder, "PHEV")
     read_excel_and_insert_to_db(conventional_folder, "Conventional")
 
+    html = """
+            <div>
+                <h2>Data insertion done</h2>
+                <a href="/datamining/">CHECK</a>
+            </div>
+            """
+
+
+    response = HttpResponse(html, content_type="text/html", status=200)
+
+    return response
+
 
 def read_excel_and_insert_to_db(folder_path, v_type):
+
     # Iterate over each file in the folder
     for file_name in os.listdir(folder_path):
         if file_name.endswith('.csv'):
             file_path = os.path.join(folder_path, file_name)
             # Read CSV file into a pandas DataFrame
-            df = pd.read_csv(file_path)
+            df = pd.read_csv(file_path, encoding='ISO-8859-1')
 
             columns_to_check = [
                 'Highway (L/100 km)',
@@ -136,7 +152,7 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                     city_kWh=row.get('City (kWh/100 km)'),
                     highway_kWh=row.get('Highway (kWh/100 km)'),
                     combined_kWh=row.get('Combined (kWh/100 km)'),
-                    range=row.get('Range 1 (km)'),
+                    range=row.get('Range (km)') if v_type == "BEV" else row.get('Range 1 (km)') if v_type == "PHEV" else None,
                     recharge_time=row.get('Recharge time (h)'),
                     range2=row.get('Range 2 (km)'),
                     combined_PHEV=combined_phev_value,  # Assign split value to combined_PHEV

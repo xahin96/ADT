@@ -140,7 +140,11 @@ GitHub.sublime-settings
 
 # Ignore _data and data folders
 _data/
+<<<<<<< HEAD
 #data/
+=======
+# data/
+>>>>>>> main
 
 # ignore migtarions file
 **/migrations/*.py
