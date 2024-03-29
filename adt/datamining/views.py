@@ -77,6 +77,18 @@ def load_data(request):
     read_excel_and_insert_to_db(phev_folder, "PHEV")
     read_excel_and_insert_to_db(conventional_folder, "Conventional")
 
+    html = """
+            <div>
+                <h2>Data insertion done</h2>
+                <a href="/datamining/">CHECK</a>
+            </div>
+            """
+
+
+    response = HttpResponse(html, content_type="text/html", status=200)
+
+    return response
+
 
 def read_excel_and_insert_to_db(folder_path, v_type):
 
@@ -138,7 +150,7 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                     city_kWh=row.get('City (kWh/100 km)'),
                     highway_kWh=row.get('Highway (kWh/100 km)'),
                     combined_kWh=row.get('Combined (kWh/100 km)'),
-                    range=row.get('Range 1 (km)'),
+                    range=row.get('Range (km)') if v_type == "BEV" else row.get('Range 1 (km)') if v_type == "PHEV" else None,
                     recharge_time=row.get('Recharge time (h)'),
                     range2=row.get('Range 2 (km)'),
                     combined_PHEV=combined_phev_value,  # Assign split value to combined_PHEV
@@ -146,8 +158,6 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                 )
                 # Save the instance to the database
                 car_info.save()
-
-    return HttpResponse({"msg":"OK"}, status=200)
 
 
 def dashboard(request):
