@@ -1,23 +1,18 @@
 # datamining/views.py
 import os
-
 from django.shortcuts import render
 import mpld3
 import matplotlib.pyplot as plt
-from io import BytesIO
-import base64
 import pandas as pd
-from .models import CarInfoModel
-from django.conf import settings
-from pathlib import Path
-import numpy as np  # Import numpy for NaN handling
-
-from django.db.models import Q
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+import numpy as np
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpResponse
 import random
+from django.db import connection
+from django.http import HttpResponse
+from pathlib import Path
+from django.conf import settings
+from .models import CarInfoModel
 
 
 def datamining_page(request):
@@ -62,13 +57,17 @@ def datamining_page(request):
     plt.close()
 
     # Pass the HTML to the template context
-    context = {'fig_html': x}
+    context = {'fig_html': fig_html}
 
     return render(request, 'datamining/datamining_page.html', context)
 
 
+def reset_sequence(model):
+    model.objects.all().delete()
+    connection.cursor().execute(f"ALTER SEQUENCE {model._meta.db_table}_id_seq RESTART WITH 1")
+
 def load_data(request):
-    CarInfoModel.objects.all().delete()
+    reset_sequence(CarInfoModel)
 
     data_dir = Path(settings.BASE_DIR) / 'datamining' / 'data'
     bev_folder = data_dir / "BEV"
@@ -86,11 +85,9 @@ def load_data(request):
             </div>
             """
 
-
     response = HttpResponse(html, content_type="text/html", status=200)
 
     return response
-
 
 def read_excel_and_insert_to_db(folder_path, v_type):
 
