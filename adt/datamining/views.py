@@ -17,6 +17,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse
+import random
+
 
 def datamining_page(request):
     # Your logic here
@@ -209,4 +211,17 @@ def select_car(request):
 
 def car_details(request, car_id):
     car_info = get_object_or_404(CarInfoModel, id=car_id)
-    return render(request, 'datamining/car_details.html', {'car_info': car_info})
+
+    # Get all cars excluding the current one
+    all_cars = CarInfoModel.objects.exclude(id=car_id)
+
+    # Randomly select 5 similar cars
+    similar_cars = random.sample(list(all_cars), min(5, all_cars.count()))
+
+    return render(request, 'datamining/car_details.html', {'car_info': car_info, 'similar_cars': similar_cars})
+
+
+def compare_cars(request, car1_id, car2_id):
+    car1 = get_object_or_404(CarInfoModel, id=car1_id)
+    car2 = get_object_or_404(CarInfoModel, id=car2_id)
+    return render(request, 'datamining/compare_cars.html', {'car1': car1, 'car2': car2})

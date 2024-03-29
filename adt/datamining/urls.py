@@ -5,7 +5,8 @@ from .views import (
     load_data,
     dashboard,
     select_car,
-    car_details
+    car_details,
+    compare_cars
 )
 
 urlpatterns = [
@@ -14,4 +15,5 @@ urlpatterns = [
     path('load/', load_data, name='datamining_page'),
     path('select-car/', select_car, name='datamining_page'),
     path('car_details/<int:car_id>/', car_details, name='car_details'),
+    path('compare_cars/<int:car1_id>/<int:car2_id>/', compare_cars, name='compare_cars'),
 ]

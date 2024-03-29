@@ -1,0 +1,52 @@
+<!-- compare_cars.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Car Comparison{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Button to go back to car details page -->
+    <div class="row mt-4">
+        <div class="col">
+            <a href="{% url 'car_details' car1.id %}" class="btn btn-dark">Back to Car Details</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h2 class="mb-4">Car Comparison</h2>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Attribute</th>
+                            <th>{{ car1.make }} {{ car1.car_model }}</th>
+                            <th>{{ car2.make }} {{ car2.car_model }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Loop through car attributes -->
+                        <tr>
+                            <td>Model Year</td>
+                            <td>{{ car1.model_year }}</td>
+                            <td>{{ car2.model_year }}</td>
+                        </tr>
+                        <tr>
+                            <td>Make</td>
+                            <td>{{ car1.make }}</td>
+                            <td>{{ car2.make }}</td>
+                        </tr>
+                        <tr>
+                            <td>Car Model</td>
+                            <td>{{ car1.car_model }}</td>
+                            <td>{{ car2.car_model }}</td>
+                        </tr>
+                        <!-- Add more rows for other attributes -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
