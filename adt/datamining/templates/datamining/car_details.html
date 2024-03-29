@@ -14,5 +14,30 @@
         <p><strong>Vehicle Class:</strong> {{ car_info.vehicle_class }}</p>
         <!-- Add other fields as needed -->
     </div>
+
+    <!-- Table for selecting similar cars -->
+    <h2 class="mt-5 mb-3">Select Similar Cars</h2>
+    <table class="table table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Select</th>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Vehicle Class</th>
+                <!-- Add other fields as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for similar_car in similar_cars %}
+            <tr>
+                <td><a href="{% url 'compare_cars' car_info.id similar_car.id %}" class="btn btn-primary">Select</a></td>
+                <td>{{ similar_car.make }}</td>
+                <td>{{ similar_car.car_model }}</td>
+                <td>{{ similar_car.vehicle_class }}</td>
+                <!-- Add other fields as needed -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
