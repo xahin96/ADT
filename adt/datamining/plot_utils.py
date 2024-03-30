@@ -41,7 +41,7 @@ def generate_plot_html():
     # Plotting the horizontal bar graph for bottom 10
     plt.figure(figsize=(6, 5))
     bottom_10.plot(kind='barh', color='salmon')
-    plt.title('LEast 10 Mean CO2 Emissions by Brand')
+    plt.title('Least 10 Mean CO2 Emissions by Brand')
     plt.xlabel('Mean CO2 Emissions (g/km)')
     plt.ylabel('Brand')
     plt.tight_layout()
