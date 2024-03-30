@@ -62,7 +62,7 @@ def datamining_page(request):
     plt.close()
 
     # Pass the HTML to the template context
-    context = {'fig_html': x}
+    context = {'fig_html': fig_html}
 
     return render(request, 'datamining/datamining_page.html', context)
 
