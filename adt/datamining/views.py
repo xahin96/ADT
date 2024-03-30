@@ -1,18 +1,24 @@
 # datamining/views.py
 import os
-from django.shortcuts import render
 import mpld3
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from django.shortcuts import get_object_or_404
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import (
+    Paginator,
+    EmptyPage,
+    PageNotAnInteger
+)
 import random
 from django.db import connection
 from django.http import HttpResponse
 from pathlib import Path
 from django.conf import settings
 from .models import CarInfoModel
+from .plot_utils import generate_plot_html
+from django.shortcuts import render
+
 
 
 def datamining_page(request):
@@ -66,6 +72,7 @@ def reset_sequence(model):
     model.objects.all().delete()
     connection.cursor().execute(f"ALTER SEQUENCE {model._meta.db_table}_id_seq RESTART WITH 1")
 
+
 def load_data(request):
     reset_sequence(CarInfoModel)
 
@@ -88,6 +95,7 @@ def load_data(request):
     response = HttpResponse(html, content_type="text/html", status=200)
 
     return response
+
 
 def read_excel_and_insert_to_db(folder_path, v_type):
 
@@ -159,28 +167,20 @@ def read_excel_and_insert_to_db(folder_path, v_type):
                 car_info.save()
 
 
+# views.py
 def dashboard(request):
-    car_infos = CarInfoModel.objects.all()
+    plot_html = generate_plot_html()
 
-    make = request.GET.get('make')
-    model_year = request.GET.get('model_year')
+    return render(
+        request,
+        'datamining/dashboard.html',
+        {
+            'top_html': plot_html['top_10'],  # Corrected key
+            'bottom_html': plot_html['bottom_10'],  # Corrected key
+            'co2_emission_html': plot_html['co2_emission_yearly']  # Corrected key
+        }
+    )
 
-    if make:
-        car_infos = car_infos.filter(make__icontains=make)
-    if model_year:
-        car_infos = car_infos.filter(model_year=model_year)
-
-    # Paginate the filtered queryset
-    paginator = Paginator(car_infos, 10)  # 10 items per page
-    page = request.GET.get('page')
-    try:
-        car_infos = paginator.page(page)
-    except PageNotAnInteger:
-        car_infos = paginator.page(1)
-    except EmptyPage:
-        car_infos = paginator.page(paginator.num_pages)
-
-    return render(request, 'datamining/dashboard.html', {'car_infos': car_infos})
 
 
 def select_car(request):
