@@ -1,0 +1,105 @@
+import numpy as np
+import pandas as pd
+
+# for plotting the heatmap
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# recommendation
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
+
+import psycopg2
+# Establish connection
+conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", host="localhost", port="5432")
+
+# SQL query
+query = """
+    SELECT id, model_year, make, car_model, vehicle_class, engine_size, cylinders, transmission,
+           fuel_type, city, highway, combined, combined_mpg, "CO2_Emission",
+           motor, "city_kWh", "highway_kWh", "combined_kWh", range, recharge_time, 
+           fuel_type2, range2, "combined_PHEV", vehicle_type
+    FROM datamining_carinfomodel;
+"""
+
+
+df = pd.read_sql_query(query, conn)
+
+
+## data visualization
+
+# top 10 list
+
+# First, let's calculate the mean CO2 emissions brand-wise
+mean_co2_by_brand = df.groupby('make')['CO2_Emission'].mean()
+
+# Now, let's sort the mean CO2 emissions in descending order
+sorted_mean_co2 = mean_co2_by_brand.sort_values(ascending=False)
+
+top_10 = sorted_mean_co2.head(10)
+bottom_10 = sorted_mean_co2.tail(10)
+
+# Plotting the horizontal bar graph for top 10
+plt.figure(figsize=(6, 5))  # Set the figure size
+top_10.plot(kind='barh', color='skyblue')  # Plotting the horizontal bar graph
+plt.title('Most 10 Mean CO2 Emissions by Brand')
+plt.xlabel('Mean CO2 Emissions (g/km)')
+plt.ylabel('Brand')
+plt.tight_layout()  # Adjust layout to prevent clipping of labels
+plt.show()  # Show the plot
+
+# Plotting the horizontal bar graph for bottom 10
+plt.figure(figsize=(6, 5))  # Set the figure size
+bottom_10.plot(kind='barh', color='salmon')  # Plotting the horizontal bar graph
+plt.title('LEast 10 Mean CO2 Emissions by Brand')
+plt.xlabel('Mean CO2 Emissions (g/km)')
+plt.ylabel('Brand')
+plt.tight_layout()  # Adjust layout to prevent clipping of labels
+plt.show()  # Show the plot
+
+####################
+
+# Avg CO2 emissions based on vehicle class
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Assuming df is your DataFrame containing the data
+# Load your dataset into a pandas DataFrame
+# Example:
+# df = pd.read_csv('your_dataset.csv')
+
+# Group by 'Vehicle class' and calculate the average CO2 emissions
+
+
+
+
+
+### year over year CO2 emission by FUEL type
+
+conventional_df = df[df['vehicle_type'] == "Conventional"]
+
+# Group by 'Fuel type' and 'Model year', then calculate the average CO2 emissions
+co2_emission_yearly = conventional_df.groupby(['fuel_type', 'model_year'])['CO2_Emission'].mean().reset_index()
+
+# TODO think about the fuel_type_2
+
+# Map fuel type codes to labels
+fuel_type_labels = {'X': 'Regular gasoline', 'Z': 'Premium gasoline', 'D': 'Diesel', 'E': 'E85', 'N': 'Natural Gas'}
+co2_emission_yearly['fuel_type'] = co2_emission_yearly['fuel_type'].map(fuel_type_labels)
+
+# Aggregate duplicate entries (if any)
+co2_emission_yearly = co2_emission_yearly.groupby(['fuel_type', 'model_year']).mean().reset_index()
+
+# Pivot the DataFrame to have 'Fuel type' as columns
+co2_emission_yearly_pivot = co2_emission_yearly.pivot(index='model_year', columns='fuel_type', values='CO2_Emission')
+
+# Plot the data
+co2_emission_yearly_pivot.plot(kind='line', marker='o', figsize=(10, 6))
+plt.title('Average CO2 Emissions by Fuel Type and Year')
+plt.xlabel('Model Year')
+plt.ylabel('Average CO2 Emissions (g/km)')
+# plt.grid(True)
+plt.legend(title='Fuel Type')
+plt.tight_layout()
+plt.show() 

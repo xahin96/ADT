@@ -1,0 +1,138 @@
+import numpy as np
+import pandas as pd
+
+# for plotting the heatmap
+import matplotlib.pyplot as plt
+
+# recommendation
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
+
+#######
+
+import psycopg2
+# Establish connection
+conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", host="localhost", port="5432")
+
+# SQL query
+query = """
+    SELECT id, model_year, make, car_model, vehicle_class, engine_size, cylinders, transmission,
+           fuel_type, city, highway, combined, combined_mpg, "CO2_Emission",
+           motor, "city_kWh", "highway_kWh", "combined_kWh", range, recharge_time, 
+           fuel_type2, range2, "combined_PHEV", vehicle_type
+    FROM datamining_carinfomodel;
+"""
+
+df = pd.read_sql_query(query, conn)
+
+#######
+
+from sklearn.preprocessing import MinMaxScaler
+
+transforemer = pd.get_dummies(df)
+# List of attributes to be scaled
+attributes_to_scale = ['engine_size', 'cylinders', 'city', 'highway', 'combined', 'combined_mpg','motor', 'city_kWh', 'highway_kWh', 'combined_kWh','range','range2', 'recharge_time', 'CO2_Emission']
+
+# Initialize MinMaxScaler
+scaler = MinMaxScaler()
+
+# Fit and transform the specified attributes
+transforemer[attributes_to_scale] = scaler.fit_transform(transforemer[attributes_to_scale])
+
+transforemer.fillna(0, inplace=True)
+
+#######
+
+# SPIDER chart try older one direct from scalled data
+
+def plot_radar_chart(car1_id, car2_id, data):
+    car1_whole_data = df[df['id'] == car1_id]
+    car2_whole_data = df[df['id'] == car2_id]
+
+    print(f" car 1 : {car1_whole_data}")
+    print(f" car 2 : {car2_whole_data}")
+
+    vehicle_type_car1 = car1_whole_data.at[car1_whole_data.index[0], 'vehicle_type']
+    vehicle_type_car2 = car2_whole_data.at[car2_whole_data.index[0], 'vehicle_type']
+
+    # When car1 -> convetional; car2 -> (should be) convetional or hybrid
+    # When car1 -> hybrid; car2 -> (should be) hybrid or EV
+    # When car1 -> EV; car2 -> (should be) EV
+    
+    attributes = [];
+    if (vehicle_type_car1=="Conventional"):
+        attributes = ['engine_size' ,'cylinders' , 'city' , 'highway' ,'combined' , 'combined_mpg' , 'CO2_Emission']
+    elif (vehicle_type_car1=="BEV"):
+        attributes = ['motor', 'range','city_kWh', 'highway_kWh', 'CO2_Emission', 'combined_kWh', 'recharge_time']
+    elif (vehicle_type_car1=="PHEV"):
+        if (vehicle_type_car2=="PHEV"):
+            attributes = ['engine_size','cylinders','city','highway','combined','motor','range', 'recharge_time','range2', 'CO2_Emission']
+        elif (vehicle_type_car2=="BEV"):
+            attributes = ['motor','range', 'recharge_time','CO2_Emission']
+
+    print(attributes)
+
+    # Get data for car1 and car2
+    car1_data = transforemer[transforemer.id == car1_id][attributes].iloc[0]
+    car2_data = transforemer[transforemer.id == car2_id][attributes].iloc[0]
+
+    # print(car1_data)
+    # print(car2_data)
+
+    # Radar chart attributes
+    labels = np.array(attributes)
+    num_vars = len(labels)
+
+    # Compute angle for each axis
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+
+    # Complete the loop
+    car1_data = np.concatenate((car1_data,[car1_data[0]]))
+    car2_data = np.concatenate((car2_data,[car2_data[0]]))
+    angles += angles[:1]
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+
+    ax.fill(angles, car1_data, color='red', alpha=0.25, label=f'Car {car1_id}')
+    ax.fill(angles, car2_data, color='blue', alpha=0.25, label=f'Car {car2_id}')
+
+    # Add legend
+    ax.legend(loc='upper right', fontsize='medium')
+
+    # Add labels
+    ax.set_yticklabels([])
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(attributes)
+
+
+    # Setting range for the radar chart
+    ax.set_ylim(0, max(max(car1_data), max(car2_data)) * 1.1)
+
+    # Adding title
+    plt.title(f'Comparison between {car1_whole_data["make"]} {car1_whole_data["car_model"]} and {car2_whole_data["make"]} {car2_whole_data["car_model"]}', size=20, color='black', y=1.1)
+
+
+    # Improve aesthetics
+    plt.grid(True, linestyle='--', linewidth=0.5)
+
+    plt.show()
+
+######
+
+# Example usage
+# Assuming 'data' is a DataFrame containing the necessary information
+# Replace 'data' with your actual DataFrame name
+# Replace 'car1_id' and 'car2_id' with the IDs of the cars you want to compare
+
+# conventional vs conventional
+# plot_radar_chart(22000, 23000, transforemer)
+
+# conventional vs hybrid
+# plot_radar_chart(2000, 750, transforemer)
+
+# hybrid vs hybrid
+# plot_radar_chart(750, 930, transforemer)
+
+# hybrid vs EV
+# plot_radar_chart(750, 450, transforemer)
