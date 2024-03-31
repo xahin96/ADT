@@ -1,5 +1,3 @@
-<!-- compare_cars.html -->
-
 {% extends 'base.html' %}
 
 {% block title %}Car Comparison{% endblock %}
@@ -14,7 +12,7 @@
     </div>
 
     <div class="row">
-        <div class="col">
+        <div class="col-md-6">
             <h2 class="mb-4">Car Comparison</h2>
             <div class="table-responsive">
                 <table class="table table-bordered">
@@ -42,17 +40,127 @@
                             <td>{{ car1.car_model }}</td>
                             <td>{{ car2.car_model }}</td>
                         </tr>
+                        <tr>
+                            <td>Vehicle Class</td>
+                            <td>{{ car1.vehicle_class }}</td>
+                            <td>{{ car2.vehicle_class }}</td>
+                        </tr>
+                        <tr>
+                            <td>Engine Size</td>
+                            <td>{{ car1.engine_size }}</td>
+                            <td>{{ car2.engine_size }}</td>
+                        </tr>
+                        <tr>
+                            <td>Cylinders</td>
+                            <td>{{ car1.cylinders }}</td>
+                            <td>{{ car2.cylinders }}</td>
+                        </tr>
+                        <tr>
+                            <td>Transmission</td>
+                            <td>{{ car1.transmission }}</td>
+                            <td>{{ car2.transmission }}</td>
+                        </tr>
+                        <tr>
+                            <td>Fuel Type</td>
+                            <td>{{ car1.fuel_type }}</td>
+                            <td>{{ car2.fuel_type }}</td>
+                        </tr>
+                        <tr>
+                            <td>City MPG</td>
+                            <td>{{ car1.city }}</td>
+                            <td>{{ car2.city }}</td>
+                        </tr>
+                        <tr>
+                            <td>Highway MPG</td>
+                            <td>{{ car1.highway }}</td>
+                            <td>{{ car2.highway }}</td>
+                        </tr>
+                        <tr>
+                            <td>Combined MPG</td>
+                            <td>{{ car1.combined }}</td>
+                            <td>{{ car2.combined }}</td>
+                        </tr>
+                        <tr>
+                            <td>Combined MPG (Electric)</td>
+                            <td>{{ car1.combined_mpg }}</td>
+                            <td>{{ car2.combined_mpg }}</td>
+                        </tr>
+                        <tr>
+                            <td>CO2 Emission</td>
+                            <td>{{ car1.CO2_Emission }}</td>
+                            <td>{{ car2.CO2_Emission }}</td>
+                        </tr>
+                        <tr>
+                            <td>CO2 Rating</td>
+                            <td>{{ car1.CO2_Rating }}</td>
+                            <td>{{ car2.CO2_Rating }}</td>
+                        </tr>
+                        <tr>
+                            <td>Smog Rating</td>
+                            <td>{{ car1.smog_rating }}</td>
+                            <td>{{ car2.smog_rating }}</td>
+                        </tr>
+                        <tr>
+                            <td>Motor</td>
+                            <td>{{ car1.motor }}</td>
+                            <td>{{ car2.motor }}</td>
+                        </tr>
+                        <tr>
+                            <td>City kWh/100 km</td>
+                            <td>{{ car1.city_kWh }}</td>
+                            <td>{{ car2.city_kWh }}</td>
+                        </tr>
+                        <tr>
+                            <td>Highway kWh/100 km</td>
+                            <td>{{ car1.highway_kWh }}</td>
+                            <td>{{ car2.highway_kWh }}</td>
+                        </tr>
+                        <tr>
+                            <td>Combined kWh/100 km</td>
+                            <td>{{ car1.combined_kWh }}</td>
+                            <td>{{ car2.combined_kWh }}</td>
+                        </tr>
+                        <tr>
+                            <td>Electric Range</td>
+                            <td>{{ car1.range }}</td>
+                            <td>{{ car1.range }}</td>
+                        </tr>
+                        <tr>
+                            <td>Recharge Time</td>
+                            <td>{{ car1.recharge_time }}</td>
+                            <td>{{ car2.recharge_time }}</td>
+                        </tr>
+                        <tr>
+                            <td>Fuel Type 2</td>
+                            <td>{{ car1.fuel_type2 }}</td>
+                            <td>{{ car2.fuel_type2 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Range 2</td>
+                            <td>{{ car1.range2 }}</td>
+                            <td>{{ car2.range2 }}</td>
+                        </tr>
+                        <tr>
+                            <td>Combined MPG (PHEV)</td>
+                            <td>{{ car1.combined_PHEV }}</td>
+                            <td>{{ car2.combined_PHEV }}</td>
+                        </tr>
+                        <tr>
+                            <td>Vehicle Type</td>
+                            <td>{{ car1.vehicle_type }}</td>
+                            <td>{{ car2.vehicle_type }}</td>
+                        </tr>
                         <!-- Add more rows for other attributes -->
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
-
-    <div>
-        <!-- <h3>Car Attributes comparison</h3>
-        <div>Spider chart</div> -->
-        {{ spider_html|safe }}
+        <div class="col-md-6">
+            <h2>Comparison between {{ car1.make }} {{ car1.car_model }} and {{ car2.make }} {{ car2.car_model }}</h2>
+            <div>
+                {{ spider_html|safe }}
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

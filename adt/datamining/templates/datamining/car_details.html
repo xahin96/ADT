@@ -17,27 +17,73 @@
 
     <!-- Table for selecting similar cars -->
     <h2 class="mt-5 mb-3">Select Similar Cars</h2>
-    <table class="table table-hover">
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
         <thead class="thead-dark">
             <tr>
                 <th>Select</th>
+                <th>Model Year</th>
                 <th>Make</th>
                 <th>Model</th>
                 <th>Vehicle Class</th>
-                <!-- Add other fields as needed -->
+                <th>Engine Size</th>
+                <th>Cylinders</th>
+                <th>Transmission</th>
+                <th>Fuel Type</th>
+                <th>City (L/100 km)</th>
+                <th>Highway (L/100 km)</th>
+                <th>Combined (L/100 km)</th>
+                <th>Combined (mpg)</th>
+                <th>CO2 Emission (g/km)</th>
+                <th>CO2 Rating</th>
+                <th>Smog Rating</th>
+                <th>Motor (kW)</th>
+                <th>City (kWh/100 km)</th>
+                <th>Highway (kWh/100 km)</th>
+                <th>Combined (kWh/100 km)</th>
+                <th>Range 1 (km)</th>
+                <th>Recharge Time (h)</th>
+                <th>Fuel Type 2</th>
+                <th>Range 2 (km)</th>
+                <th>Combined PHEV (Le/100 km)</th>
+                <th>Vehicle Type</th>
             </tr>
         </thead>
         <tbody>
             {% for similar_car in similar_cars %}
             <tr>
                 <td><a href="{% url 'compare_cars' car_info.id similar_car.id %}" class="btn btn-primary">Select</a></td>
-                <td>{{ similar_car.make }}</td>
-                <td>{{ similar_car.car_model }}</td>
-                <td>{{ similar_car.vehicle_class }}</td>
+                <td>{{ car_info.model_year }}</td>
+                <td>{{ car_info.make }}</td>
+                <td>{{ car_info.car_model }}</td>
+                <td>{{ car_info.vehicle_class }}</td>
+                <td>{{ car_info.engine_size }}</td>
+                <td>{{ car_info.cylinders }}</td>
+                <td>{{ car_info.transmission }}</td>
+                <td>{{ car_info.fuel_type }}</td>
+                <td>{{ car_info.city }}</td>
+                <td>{{ car_info.highway }}</td>
+                <td>{{ car_info.combined }}</td>
+                <td>{{ car_info.combined_mpg }}</td>
+                <td>{{ car_info.CO2_Emission }}</td>
+                <td>{{ car_info.CO2_Rating }}</td>
+                <td>{{ car_info.smog_rating }}</td>
+                <td>{{ car_info.motor }}</td>
+                <td>{{ car_info.city_kWh }}</td>
+                <td>{{ car_info.highway_kWh }}</td>
+                <td>{{ car_info.combined_kWh }}</td>
+                <td>{{ car_info.range }}</td>
+                <td>{{ car_info.recharge_time }}</td>
+                <td>{{ car_info.fuel_type2 }}</td>
+                <td>{{ car_info.range2 }}</td>
+                <td>{{ car_info.combined_PHEV }}</td>
+                <td>{{ car_info.vehicle_type }}</td>
                 <!-- Add other fields as needed -->
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    </div>
 </div>
 {% endblock %}
