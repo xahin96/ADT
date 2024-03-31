@@ -291,3 +291,4 @@ Model year,Make,Model,Vehicle class,Motor (kW),Engine size (L),Cylinders,Transmi
 2024,Volvo,V60 T8 AWD Recharge,Station wagon: Small,107,2.0,4,AS8,B/Z*,3.0 ([27.2 kWh + 0.0 L]/100 km),64,5,Z,8.0,7.2,7.6,792,58,10,7
 2024,Volvo,XC60 T8 AWD Recharge,Sport utility vehicle: Small,107,2.0,4,AS8,B/Z*,3.5 ([31.2 kWh + 0.0 L]/100 km),58,5,Z,8.5,8.5,8.5,838,72,9,7
 2024,Volvo,XC90 T8 AWD Recharge,Sport utility vehicle: Standard,107,2.0,4,AS8,B/Z*,3.8 ([34.4 kWh + 0.0 L]/100 km),53,5,Z,9.1,8.6,8.9,803,82,9,7
+"*In testing, this vehicle did not use any gasoline during electric mode operation. However, depending on how you drive the vehicle, you may use gasoline during electric mode operation following a full charge.",,,,,,,,,,,,,,,,,,,
