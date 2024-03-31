@@ -1,0 +1,13 @@
+.filter-panel {
+    float: left;
+    width: 200px; /* Adjust width as needed */
+    margin-right: 20px; /* Add space between filter panel and results */
+}
+
+.filter-panel form {
+    margin-bottom: 20px; /* Add space between fields and button */
+}
+
+.btn {
+    width: 100%; /* Make button full width */
+}

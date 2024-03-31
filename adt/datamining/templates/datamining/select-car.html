@@ -11,7 +11,12 @@
     <form method="GET" class="form-inline mb-4">
         <div class="form-group mr-2">
             <label for="make">Make:</label>
-            <input type="text" class="form-control" id="make" name="make" value="{{ request.GET.make }}">
+            <select class="form-control" id="make" name="make">
+                <option value="">--Select--</option>
+                <!-- Add options for each car make -->
+<!--                <option value="smart EQ">smart EQ</option>-->
+                <!-- Add all other car makes here -->
+            </select>
         </div>
         <div class="form-group mr-2">
             <label for="model_year">Model Year:</label>
@@ -116,4 +121,61 @@
     </nav>
     <!-- End Pagination -->
 </div>
+
+<script>
+    // Get the select element and input field
+    var selectElement = document.getElementById('make');
+    var inputElement = document.getElementById('make_manual');
+
+    // Store the initially selected option
+    var initiallySelectedOption = selectElement.value;
+
+    // Populate the select element with options
+    var makes = [
+        "smart EQ", "smart", "Volvo", "Volkswagen", "VinFast", "Toyota", "Tesla",
+        "Suzuki", "Subaru", "Scion", "Saturn", "Saab", "SRT", "Rolls-Royce",
+        "Rivian", "Ram", "Porsche", "Pontiac", "Polestar", "Nissan", "Mitsubishi",
+        "Mercedes-Benz", "Mazda", "Maserati", "MINI", "Lucid", "Lincoln", "Lexus",
+        "Land Rover", "Lamborghini", "Kia", "Karma", "Jeep", "Jaguar", "Infiniti",
+        "Hyundai", "Hummer", "Honda", "Genesis", "GMC", "Ford", "Fisker", "Ferrari",
+        "FIAT", "Dodge", "Chrysler", "Chevrolet", "Cadillac", "Buick", "Bugatti",
+        "Bentley", "BMW", "Audi", "Aston Martin", "Alfa Romeo", "Acura"
+    ];
+
+    makes.forEach(function(make) {
+        var option = document.createElement('option');
+        option.text = make;
+        option.value = make;
+        selectElement.appendChild(option);
+    });
+
+    // Add event listener to input field for suggestions
+    inputElement.addEventListener('input', function() {
+        var input = this.value.toLowerCase();
+        var options = selectElement.options;
+
+        // Clear previous suggestions
+        for (var i = 0; i < options.length; i++) {
+            options[i].style.display = 'block';
+        }
+
+        // Filter options based on input
+        for (var i = 0; i < options.length; i++) {
+            var option = options[i];
+            var text = option.text.toLowerCase();
+            if (!text.includes(input)) {
+                option.style.display = 'none';
+            }
+        }
+
+        // Reapply the initially selected option if it's still visible
+        var selectedOption = selectElement.value;
+        if (options.namedItem(initiallySelectedOption).style.display !== 'none') {
+            selectElement.value = initiallySelectedOption;
+        }
+    });
+</script>
+
+
+
 {% endblock %}
