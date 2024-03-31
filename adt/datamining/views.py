@@ -20,7 +20,7 @@ from .plot_utils import generate_plot_html
 from django.shortcuts import render
 
 # recommendation
-from .plot_utils import recommend_similar_cars
+from .plot_utils import recommend_similar_cars, plot_radar_chart
 
 import numpy as np
 import pandas as pd
@@ -255,4 +255,29 @@ def car_details(request, car_id):
 def compare_cars(request, car1_id, car2_id):
     car1 = get_object_or_404(CarInfoModel, id=car1_id)
     car2 = get_object_or_404(CarInfoModel, id=car2_id)
-    return render(request, 'datamining/compare_cars.html', {'car1': car1, 'car2': car2})
+
+    all_cars = CarInfoModel.objects.all()
+
+    # Convert Django QuerySet to DataFrame
+    data = list(all_cars.values())
+    df = pd.DataFrame(data)
+
+    # Preprocessing
+
+    # Saving IDs
+    ids = df['id'].tolist()
+
+    # Each variable is converted in as many 0/1 variables as there are different values.
+    # Columns in the output are each named after a value; if the input is a DataFrame, the name of the original variable is prepended to the value.
+    transformer = pd.get_dummies(df)
+    scaler = MinMaxScaler()
+    attributes_to_scale = ['engine_size', 'cylinders', 'city', 'highway', 'combined', 'combined_mpg','motor', 'city_kWh', 'highway_kWh', 'combined_kWh','range','range2', 'recharge_time', 'CO2_Emission']
+    transformer[attributes_to_scale] = scaler.fit_transform(transformer[attributes_to_scale])
+    transformer.fillna(0, inplace=True)
+
+    # Adding IDs back
+    transformer['id'] = ids
+
+    spider_html = plot_radar_chart(car1_id, car2_id, df, transformer)
+ 
+    return render(request, 'datamining/compare_cars.html', {'car1': car1, 'car2': car2, 'spider_html': spider_html})

@@ -1,3 +1,4 @@
+from .models import CarInfoModel
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -6,6 +7,9 @@ import mpld3
 
 # recommendation
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
+# spider
+import plotly.graph_objects as go
 
 def generate_plot_html():
     # Establish connection
@@ -273,3 +277,178 @@ def recommend_similar_cars(df, transformer, source_car_id, filter_carbon_emissio
 
     # print(recommended_cars)
     return recommended_cars.values()
+
+# SPIDER chart try older one direct from scalled data
+
+# def plot_radar_chart(car1_id, car2_id, cars):
+
+    #  Convert Django QuerySet to DataFrame
+    data = list(cars.values())
+    df = pd.DataFrame(data)
+
+    # Accessing fields using dot notation
+    car1 = CarInfoModel.objects.get(id=car1_id)
+    car2 = CarInfoModel.objects.get(id=car2_id)
+
+    vehicle_type_car1 = car1.vehicle_type
+    vehicle_type_car2 = car2.vehicle_type
+
+    # List of attributes to be scaled
+    attributes_to_scale = ['engine_size', 'cylinders', 'city', 'highway', 'combined', 'combined_mpg', 'motor', 'city_kWh', 'highway_kWh', 'combined_kWh', 'range', 'range2', 'recharge_time', 'CO2_Emission']
+
+    # Initialize MinMaxScaler
+    scaler = MinMaxScaler()
+
+    # Scale the specified attributes
+    df_scaled = df.copy()  # Create a copy of the DataFrame to avoid modifying the original
+    df_scaled[attributes_to_scale] = scaler.fit_transform(df_scaled[attributes_to_scale])
+
+    # Apply one-hot encoding
+    transformer = pd.get_dummies(df_scaled)
+
+    transformer.fillna(0, inplace=True)
+
+    # Constructing the title
+    make_car1 = getattr(car1, 'make', '')
+    car_model_car1 = getattr(car1, 'car_model', '')
+    make_car2 = getattr(car2, 'make', '')
+    car_model_car2 = getattr(car2, 'car_model', '')
+    title = f'Comparison between {make_car1} {car_model_car1} and {make_car2} {car_model_car2}'
+
+    # Print attributes
+    print(attributes_to_scale)
+
+    # Determine attributes based on vehicle type
+    if vehicle_type_car1 == "Conventional":
+        attributes = ['engine_size', 'cylinders', 'city', 'highway', 'combined', 'combined_mpg', 'CO2_Emission']
+    elif vehicle_type_car1 == "BEV":
+        attributes = ['motor', 'range', 'city_kWh', 'highway_kWh', 'CO2_Emission', 'combined_kWh', 'recharge_time']
+    elif vehicle_type_car1 == "PHEV":
+        if vehicle_type_car2 == "PHEV":
+            attributes = ['engine_size', 'cylinders', 'city', 'highway', 'combined', 'motor', 'range', 'recharge_time', 'range2', 'CO2_Emission']
+        elif vehicle_type_car2 == "BEV":
+            attributes = ['motor', 'range', 'recharge_time', 'CO2_Emission']
+
+    print(attributes)
+
+    # Get data for car1 and car2
+    car1_data = transformer[transformer.id == car1.id][attributes].iloc[0]
+    car2_data = transformer[transformer.id == car2.id][attributes].iloc[0]
+
+    # Radar chart attributes
+    labels = np.array(attributes)
+    num_vars = len(labels)
+
+    # Compute angle for each axis
+    angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+
+    # Complete the loop
+    car1_data = np.concatenate((car1_data,[car1_data[0]]))
+    car2_data = np.concatenate((car2_data,[car2_data[0]]))
+    angles += angles[:1]
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+
+    ax.fill(angles, car1_data, color='red', alpha=0.25, label=f'Car {car1.id}')
+    ax.fill(angles, car2_data, color='blue', alpha=0.25, label=f'Car {car2.id}')
+
+    # Add legend
+    ax.legend(loc='upper right', fontsize='medium')
+
+    # Add labels
+    ax.set_yticklabels([])
+    ax.set_xticks(angles[:-1])
+    ax.set_xticklabels(attributes)
+
+    # Setting range for the radar chart
+    ax.set_ylim(0, max(max(car1_data), max(car2_data)) * 1.1)
+
+    # Adding title
+    plt.title(title, size=20, color='black', y=1.1)
+
+    # Improve aesthetics
+    plt.grid(True, linestyle='--', linewidth=0.5)
+
+    # plt.show()
+
+    spider_html = mpld3.fig_to_html(plt.gcf())
+    plt.close()
+
+    return spider_html
+
+# SPIDER chart try older one direct from scalled data --> method from application
+def plot_radar_chart(car1_id, car2_id, df, transformer):
+    car1_whole_data = df[df['id'] == car1_id]
+    car2_whole_data = df[df['id'] == car2_id]
+
+    print(f" car 1 : {car1_whole_data}")
+    print(f" car 2 : {car2_whole_data}")
+
+    vehicle_type_car1 = car1_whole_data['vehicle_type'].iloc[0]
+    vehicle_type_car2 = car2_whole_data['vehicle_type'].iloc[0]
+
+    # When car1 -> convetional; car2 -> (should be) convetional or hybrid
+    # When car1 -> hybrid; car2 -> (should be) hybrid or EV
+    # When car1 -> EV; car2 -> (should be) EV
+
+    print(vehicle_type_car1)
+    print(vehicle_type_car2)
+    
+    attributes = [];
+    if (vehicle_type_car1=="Conventional"):
+        attributes = ['engine_size' ,'cylinders' , 'city' , 'highway' ,'combined' , 'combined_mpg' , 'CO2_Emission']
+    elif (vehicle_type_car1=="BEV"):
+        attributes = ['motor', 'range','city_kWh', 'highway_kWh', 'CO2_Emission', 'combined_kWh', 'recharge_time']
+    elif (vehicle_type_car1=="PHEV"):
+        if (vehicle_type_car2=="PHEV"):
+            attributes = ['engine_size','cylinders','city','highway','combined','motor','range', 'recharge_time','range2', 'CO2_Emission']
+        elif (vehicle_type_car2=="BEV"):
+            attributes = ['motor','range', 'recharge_time','CO2_Emission']
+
+    print(attributes)
+
+    # Get data for car1 and car2
+    car1_data = transformer[transformer.id == car1_id][attributes].iloc[0]
+    car2_data = transformer[transformer.id == car2_id][attributes].iloc[0]
+
+    car1_title = f'{car1_whole_data["make"].iloc[0]} {car1_whole_data["car_model"].iloc[0]} ({car1_whole_data["model_year"].iloc[0]})'
+    car2_title = f'{car2_whole_data["make"].iloc[0]} {car2_whole_data["car_model"].iloc[0]} ({car2_whole_data["model_year"].iloc[0]})'
+
+    # Plot
+    trace_car1 = go.Scatterpolar(
+        r=car1_data.values,
+        theta=attributes,
+        fill='toself',
+        name=f'{car1_title}',
+        # line=dict(color='red'),  # Adjust color as needed
+    )
+
+    trace_car2 = go.Scatterpolar(
+        r=car2_data.values,
+        theta=attributes,
+        fill='toself',
+        name=f'{car2_title}',
+        # line=dict(color='blue'),  # Adjust color as needed
+    )
+
+    # Combine traces
+    data = [trace_car1, trace_car2]
+
+    # Define layout for the radar chart
+    layout = go.Layout(
+        polar=dict(
+            radialaxis=dict(visible=False),
+            angularaxis=dict(direction="clockwise"),
+        ),
+        showlegend=True,
+        title=f'Comparison between {car1_title} and {car2_title}',
+    )
+
+    # Create figure
+    fig = go.Figure(data=data, layout=layout)
+
+    # Convert the plot to HTML
+    plot_html = fig.to_html(full_html=False)
+
+    return plot_html

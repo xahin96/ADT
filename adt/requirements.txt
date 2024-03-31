@@ -10,3 +10,4 @@ django-crispy-forms==2.0
 matplotlib==3.8.0
 numpy==1.26.3
 scikit-learn==1.2.2
+plotly==5.20.0

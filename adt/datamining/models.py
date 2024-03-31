@@ -9,6 +9,7 @@ Vehicle_choices = (
 
 
 class CarInfoModel(djongo_models.Model):
+
     model_year = models.IntegerField() # Model year
     make = models.CharField(max_length=50) # Make
     car_model = models.CharField(max_length=50) #Model
@@ -35,3 +36,8 @@ class CarInfoModel(djongo_models.Model):
     range2 = models.IntegerField(null=True, blank=True) #Range 2 (km)
     combined_PHEV = models.FloatField(null=True, blank=True) #Combined Le/100 km
     vehicle_type = models.CharField(max_length=15, choices=Vehicle_choices)
+    def get_attribute_values(self, attributes):
+        values = []
+        for attribute in attributes:
+            values.append(getattr(self, attribute, None))
+        return values
