@@ -11,3 +11,9 @@
 .btn {
     width: 100%; /* Make button full width */
 }
+
+.table .thead-dark th {
+    color: #fff;
+    background-color: #f5b115 !important;
+    border-color: #f5b115 !important;
+}

@@ -1,8 +1,13 @@
 <!-- dashboard.html -->
 
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Car Information Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/select-car.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -26,6 +31,15 @@
             <div class="d-flex justify-content-center">
                 <div class="graph-container" style="width: 100%;">
                     {{ co2_emission_html|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-8 offset-md-2">
+            <div class="d-flex justify-content-center">
+                <div class="graph-container" style="width: 100%;">
+                    <img src="https://www.un.org/sites/un2.un.org/files/sdg7logo.png" alt="Another Image" style="width: 700px; height: auto;">
                 </div>
             </div>
         </div>
