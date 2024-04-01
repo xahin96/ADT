@@ -235,7 +235,7 @@ def car_details(request, car_id):
     # Columns in the output are each named after a value; if the input is a DataFrame, the name of the original variable is prepended to the value.
     transformer = pd.get_dummies(df)
     scaler = MinMaxScaler()
-    scale_columns = ['engine_size', 'cylinders', 'city' , 'highway','combined', 'combined_mpg', 'CO2_Emission']
+    scale_columns=['engine_size', 'cylinders', 'city', 'highway', 'combined', 'combined_mpg','motor', 'city_kWh', 'highway_kWh', 'combined_kWh','range','range2', 'recharge_time', 'CO2_Emission']
     transformer[scale_columns] = scaler.fit_transform(transformer[scale_columns])
     transformer.fillna(0, inplace=True)
 
@@ -247,7 +247,7 @@ def car_details(request, car_id):
     print(similar_cars)
     id_list = [car[0] for car in similar_cars]
     # print(id_list)
-    similar_cars = CarInfoModel.objects.filter(id__in=id_list)
+    similar_cars = CarInfoModel.objects.filter(id__in=id_list).order_by('vehicle_type')
     # print('-'*30)
     # for row in similar_cars:
     #     print(row)
