@@ -11,6 +11,9 @@ from sklearn.preprocessing import MinMaxScaler
 # spider
 import plotly.graph_objects as go
 
+import io
+import base64
+
 def generate_plot_html():
     # Establish connection
     conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", host="db", port="5432")
@@ -33,27 +36,71 @@ def generate_plot_html():
     sorted_mean_co2 = mean_co2_by_brand.sort_values(ascending=False)
 
     top_10 = sorted_mean_co2.head(10)
+    
     bottom_10 = sorted_mean_co2.tail(10)
 
+    # # Plotting the horizontal bar graph for top 10
+    # plt.figure(figsize=(6, 5))
+    # top_10.plot(kind='barh', color='skyblue')
+    # plt.title('Top 10 Brands with the Highest Mean CO2 Emissions')
+    # plt.xlabel('Mean CO2 Emissions (g/km)')
+    # plt.ylabel('Brand')
+    # plt.yticks(range(len(top_10)), top_10.index)
+    # plt.tight_layout()
+    # top_html = mpld3.fig_to_html(plt.gcf())
+    # plt.close()
+
+
     # Plotting the horizontal bar graph for top 10
-    plt.figure(figsize=(6, 5))
+    plt.figure(figsize=(10, 8))
     top_10.plot(kind='barh', color='skyblue')
-    plt.title('Most 10 Mean CO2 Emissions by Brand')
+    plt.title('Top 10 Brands with the Highest Mean CO2 Emissions')
     plt.xlabel('Mean CO2 Emissions (g/km)')
     plt.ylabel('Brand')
+    plt.yticks(range(len(top_10)), top_10.index)  # Set y-ticks to brand names
     plt.tight_layout()
-    top_html = mpld3.fig_to_html(plt.gcf())
+
+    # Save the plot to a BytesIO object
+    top_buffer = io.BytesIO()
+    plt.savefig(top_buffer, format='png')
     plt.close()
 
+    # Convert the BytesIO object to HTML
+    top_buffer.seek(0)
+    top_html = """
+        <img src="data:image/png;base64,{}" style="width: 37vw;"/>
+    """.format(base64.b64encode(top_buffer.read()).decode())
+
+    # # Plotting the horizontal bar graph for bottom 10
+    # plt.figure(figsize=(6, 5))
+    # bottom_10.plot(kind='barh', color='salmon')
+    # plt.title('Top 10 Brands with the Lowest Mean CO2 Emissions')
+    # plt.xlabel('Mean CO2 Emissions (g/km)')
+    # plt.ylabel('Brand')
+    # plt.yticks(range(len(bottom_10)), bottom_10.index)
+    # plt.tight_layout()
+    # bottom_html = mpld3.fig_to_html(plt.gcf())
+    # plt.close()
+
     # Plotting the horizontal bar graph for bottom 10
-    plt.figure(figsize=(6, 5))
+    plt.figure(figsize=(10, 8))
     bottom_10.plot(kind='barh', color='salmon')
-    plt.title('Least 10 Mean CO2 Emissions by Brand')
+    plt.title('Top 10 Brands with the Lowest Mean CO2 Emissions')
     plt.xlabel('Mean CO2 Emissions (g/km)')
     plt.ylabel('Brand')
+    plt.yticks(range(len(bottom_10)), bottom_10.index)  # Set y-ticks to brand names
     plt.tight_layout()
-    bottom_html = mpld3.fig_to_html(plt.gcf())
+
+    # Save the plot to a BytesIO object
+    bottom_buffer = io.BytesIO()
+    plt.savefig(bottom_buffer, format='png')
     plt.close()
+
+    # Convert the BytesIO object to HTML
+    bottom_buffer.seek(0)
+    bottom_html = """
+        <img src="data:image/png;base64,{}" style="width: 37vw;"/>
+    """.format(base64.b64encode(bottom_buffer.read()).decode())
 
     # Group by 'Fuel type' and 'Model year', then calculate the average CO2 emissions
     conventional_df = df[df['vehicle_type'] == "Conventional"]
