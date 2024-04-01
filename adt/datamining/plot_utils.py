@@ -83,6 +83,26 @@ def generate_plot_html():
 
     return plot_html
 
+
+def adjust_similarity_scores_for_CO2(similarity_scores, df, source_car_index, penalty_scale=1.0):
+
+    adjusted_scores = similarity_scores.copy()
+    source_CO2_emission = df.iloc[source_car_index]['CO2_Emission']
+    
+    for i in range(len(adjusted_scores[source_car_index])):
+        car_CO2_emission = df.iloc[i]['CO2_Emission']
+        # Calculate the emission difference from the source car
+        emission_difference = car_CO2_emission - source_CO2_emission
+
+        # a simple linear penalty
+        adjustment = -penalty_scale * emission_difference
+        
+        # Apply the adjustment
+        adjusted_scores[source_car_index][i] += adjustment
+    
+    return adjusted_scores
+
+
 NUMBER_OF_ONLY_EV = 10
 NUMBER_OF_HYBRID_WITH_EV = 6
 NUMBER_OF_EV_WITH_HYBRID = 4
@@ -99,24 +119,17 @@ def recommend_similar_cars(df, transformer, source_car_id, filter_carbon_emissio
     recommended_cars = {}
 
     source_car_index = df.index[df['id'] == source_car_id][0]
-    # print("-2"*30)
 
     if source_vehicle_type == "BEV":
-        # print("-3"*30)
-        try:
-            weighted_data = transformer.copy()
-        except Exception as e:
-
-            # print("-3a"*30)
-            print(e)
+        weighted_data = transformer.copy()
         user_weights = {'motor': 0.75, 'city_kWh': 0.7, 'highway_kWh': 0.8, 'combined_kWh': 0.9, 'range': 0.9, 'recharge_time': 0.9, 'CO2_Emission': 0.1}
         weighted_data[['motor', 'city_kWh', 'highway_kWh', 'combined_kWh','range', 'recharge_time', 'CO2_Emission']]*= user_weights
         similarity_scores = cosine_similarity(weighted_data.values, transformer.values)
-        # print("-3a"*30)
+
         # Get indices of top similar cars
         # Exclude self-similarity and get top <NUMBER_OF_RESULTS> similar cars
         top_similar_indices = similarity_scores[source_car_index].argsort()[::-1][1:NUMBER_OF_ONLY_EV+1]
-        # print("-3c"*30)
+
         # Filter and display recommended cars
         for idx in top_similar_indices:
             similar_car = df.iloc[idx]
@@ -127,17 +140,15 @@ def recommend_similar_cars(df, transformer, source_car_id, filter_carbon_emissio
                 continue
             if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
                 recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
-        # print("-3b"*30)
 
     elif source_vehicle_type == "PHEV":
-        # print("-4"*30)
 
         weighted_data_hybrid = transformer.copy()
         user_weights_hybrid = {'engine_size': 0.8,'cylinders': 0.8,'city':0.8,'highway':0.8,'combined':0.85,'motor': 0.6,'range': 0.9, 'recharge_time': 0.8,'range2':0.85, 'CO2_Emission': 0.1}
         weighted_data_hybrid[['engine_size','cylinders','city','highway','combined','motor','range', 'recharge_time','range2', 'CO2_Emission']] *= user_weights_hybrid
         similarity_scores_hybrid = cosine_similarity(weighted_data_hybrid.values, transformer.values)
 
-        top_similar_indices_hybrid = similarity_scores_hybrid[source_car_index].argsort()[::-1][1:NUMBER_OF_HYBRID_WITH_EV+1]
+        top_similar_indices_hybrid = similarity_scores_hybrid[source_car_index].argsort()[::-1][1:NUMBER_OF_RESULT+1]
 
         weighted_data_electric =  transformer.copy()
         user_weights_electric= {'motor': 0.75, 'range': 0.9, 'recharge_time': 0.9, 'CO2_Emission': 0.1}
@@ -148,43 +159,47 @@ def recommend_similar_cars(df, transformer, source_car_id, filter_carbon_emissio
         filtered_indices_electric = [idx for idx in range(len(similarity_scores_electric[source_car_index])) if transformer.iloc[idx]['CO2_Emission'] == 0]
 
         # Sort and slice filtered indices to get top similar indices
-        top_similar_indices_electric = sorted(filtered_indices_electric, key=lambda x: similarity_scores_electric[source_car_index][x], reverse=True)[1:NUMBER_OF_EV_WITH_HYBRID+1]
+        top_similar_indices_electric = sorted(filtered_indices_electric, key=lambda x: similarity_scores_electric[source_car_index][x], reverse=True)[1:NUMBER_OF_RESULT+1]
 
-
+        counter = 0
         for idx in top_similar_indices_electric:
-            similar_car = df.iloc[idx]
-            # print(f"1 BEV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}), CO2 emissions: {similar_car['CO2_Emission']} g/km")
-            recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+            if counter <= NUMBER_OF_EV_WITH_HYBRID:
+                similar_car = df.iloc[idx]
+                # print(f"1 BEV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}), CO2 emissions: {similar_car['CO2_Emission']} g/km")
+                recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                counter+=1
 
 
+        counter = 0
         for idx in top_similar_indices_hybrid:
-            similar_car = df.iloc[idx]
-            # print(f"2 PHEV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}), CO2 emissions: {similar_car['CO2_Emission']} g/km")
+            if counter <= NUMBER_OF_HYBRID_WITH_EV:
+                similar_car = df.iloc[idx]
+                # print(f"2 PHEV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}), CO2 emissions: {similar_car['CO2_Emission']} g/km")
 
-            # Skip if similar car has the same model as the source car
-            if similar_car['car_model'] == source_car['car_model']:
-                continue
+                # Skip if similar car has the same model as the source car
+                if similar_car['car_model'] == source_car['car_model']:
+                    continue
 
-            # Filter similar cars based on carbon emissions if filter_carbon_emission is True
-            if filter_carbon_emission and similar_car['CO2_Emission'] > source_car['CO2_Emission']:
-                continue  # Skip if similar car has higher emissions
+                # Filter similar cars based on carbon emissions if filter_carbon_emission is True
+                if filter_carbon_emission and similar_car['CO2_Emission'] > source_car['CO2_Emission']:
+                    continue  # Skip if similar car has higher emissions
 
-            if filter_carbon_emission:
-            # Keep only the car with the least carbon emissions for each model
-                if similar_car['car_model'] not in recommended_cars or similar_car['CO2_Emission'] < recommended_cars[similar_car['car_model']][3]:
-                    recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
-            else:
-                if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
-                    recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                if filter_carbon_emission:
+                # Keep only the car with the least carbon emissions for each model
+                    if similar_car['car_model'] not in recommended_cars or similar_car['CO2_Emission'] < recommended_cars[similar_car['car_model']][3]:
+                        recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                        counter+=1
+                else:
+                    if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
+                        recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                        counter+=1
     
     elif source_vehicle_type == "Conventional":
-        # print("-5"*30)
 
         max_CO2_emission_limit = source_car['CO2_Emission']
 
         print(f"max CO2 : {max_CO2_emission_limit}")
 
-        # TODO add logic
 
         # Convesntional 
         weighted_data_conventional = transformer.copy()
@@ -198,55 +213,71 @@ def recommend_similar_cars(df, transformer, source_car_id, filter_carbon_emissio
 
         # Hybrid
         weighted_data_hybrid = transformer.copy()
-        user_weights_hybrid = {'engine_size': 0.8,'cylinders': 0.8,'city':0.8,'highway':0.8,'combined':0.85,'motor': 0.6,'range': 0.9, 'recharge_time': 0.8,'range2':0.85, 'CO2_Emission': 0.1}
+        user_weights_hybrid = {'engine_size': 0.8,'cylinders': 0.8,'city':0.8,'highway':0.8,'combined':0.85,'motor': 0.6,'range': 0.9, 'recharge_time': 0.8,'range2':0.85, 'CO2_Emission': 1}
         weighted_data_hybrid[['engine_size','cylinders','city','highway','combined','motor','range', 'recharge_time','range2', 'CO2_Emission']] *= user_weights_hybrid
         similarity_scores_hybrid = cosine_similarity(weighted_data_hybrid.values, transformer.values)
 
-        top_similar_indices_hybrid = similarity_scores_hybrid[source_car_index].argsort()[::-1][1:NUMBER_OF_RESULT+1]
+        # top_similar_indices_hybrid = similarity_scores_hybrid[source_car_index].argsort()[::-1][1:NUMBER_OF_RESULT+1]
+
+        # Example usage with your data and similarity scores
+        similarity_scores_hybrid_adjusted = adjust_similarity_scores_for_CO2(
+            similarity_scores_hybrid, df, source_car_index, penalty_scale=0.009
+        )
+
+        # Now proceed with selecting the top similar indices based on the adjusted scores
+        top_similar_indices_hybrid = similarity_scores_hybrid_adjusted[source_car_index].argsort()[::-1][1:NUMBER_OF_RESULT+1]
 
         # add the hybrid ones
+        counter = 0
         for idx in top_similar_indices_hybrid:
-            similar_car = df.iloc[idx]
+            if counter <= NUMBER_OF_HYBRID_WITH_CONVENTIONAL:
+                similar_car = df.iloc[idx]
 
-            if similar_car['CO2_Emission'] <= max_CO2_emission_limit:
-                print(f"1 PHEV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}) {similar_car[4]}, CO2 emissions: {similar_car['CO2_Emission']} g/km")
-                # Skip if similar car has the same model as the source car
-                if similar_car['car_model'] == source_car['car_model']:
-                    continue
+                if similar_car['CO2_Emission'] <= max_CO2_emission_limit:
+                    # print(f"1 PHEV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}) {similar_car[4]}, CO2 emissions: {similar_car['CO2_Emission']} g/km")
+                    # Skip if similar car has the same model as the source car
+                    if similar_car['car_model'] == source_car['car_model']:
+                        continue
 
-                # Filter similar cars based on carbon emissions if filter_carbon_emission is True
-                if filter_carbon_emission and similar_car['CO2_Emission'] > source_car['CO2_Emission']:
-                    continue  # Skip if similar car has higher emissions
+                    # Filter similar cars based on carbon emissions if filter_carbon_emission is True
+                    if filter_carbon_emission and similar_car['CO2_Emission'] > source_car['CO2_Emission']:
+                        continue  # Skip if similar car has higher emissions
 
-                if filter_carbon_emission:
-                # Keep only the car with the least carbon emissions for each model
-                    if similar_car['car_model'] not in recommended_cars or similar_car['CO2_Emission'] < recommended_cars[similar_car['car_model']][3]:
-                        recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
-                else:
-                    if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
-                        recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                    if filter_carbon_emission:
+                    # Keep only the car with the least carbon emissions for each model
+                        if similar_car['car_model'] not in recommended_cars or similar_car['CO2_Emission'] < recommended_cars[similar_car['car_model']][3]:
+                            recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                            counter+=1
+                    else:
+                        if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
+                            recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                            counter+=1
 
         # add the conventional ones
+        counter = 0
         for idx in top_similar_indices_conventional:
-            similar_car = df.iloc[idx]
+            if counter <= NUMBER_OF_CONVENTIONAL_WITH_HYBRID:
+                similar_car = df.iloc[idx]
 
-            if similar_car['CO2_Emission'] <= max_CO2_emission_limit:
-                print(f"2 CONV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}) {similar_car[4]}, CO2 emissions: {similar_car['CO2_Emission']} g/km")
-                # Skip if similar car has the same model as the source car
-                if similar_car['car_model'] == source_car['car_model']:
-                    continue
+                if similar_car['CO2_Emission'] <= max_CO2_emission_limit:
+                    print(f"2 CONV ID_df: {idx} -  ID_column: {similar_car[0]} {similar_car[1]} {similar_car[2]} ({similar_car[3]}) {similar_car[4]}, CO2 emissions: {similar_car['CO2_Emission']} g/km")
+                    # Skip if similar car has the same model as the source car
+                    if similar_car['car_model'] == source_car['car_model']:
+                        continue
 
-                # Filter similar cars based on carbon emissions if filter_carbon_emission is True
-                if filter_carbon_emission and similar_car['CO2_Emission'] > source_car['CO2_Emission']:
-                    continue  # Skip if similar car has higher emissions
+                    # Filter similar cars based on carbon emissions if filter_carbon_emission is True
+                    if filter_carbon_emission and similar_car['CO2_Emission'] > source_car['CO2_Emission']:
+                        continue  # Skip if similar car has higher emissions
 
-                if filter_carbon_emission:
-                # Keep only the car with the least carbon emissions for each model
-                    if similar_car['car_model'] not in recommended_cars or similar_car['CO2_Emission'] < recommended_cars[similar_car['car_model']][3]:
-                        recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
-                else:
-                    if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
-                        recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                    if filter_carbon_emission:
+                    # Keep only the car with the least carbon emissions for each model
+                        if similar_car['car_model'] not in recommended_cars or similar_car['CO2_Emission'] < recommended_cars[similar_car['car_model']][3]:
+                            recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                            counter+=1
+                    else:
+                        if similar_car['car_model'] not in recommended_cars or similar_car['model_year'] > recommended_cars[similar_car['car_model']][3]:
+                            recommended_cars[similar_car['car_model']] = (similar_car['id'], similar_car['make'], similar_car['car_model'], similar_car['model_year'], similar_car['CO2_Emission'])
+                            counter+=1
 
 
     # print(recommended_cars)
