@@ -69,31 +69,31 @@
             {% for similar_car in similar_cars %}
             <tr>
                 <td><a href="{% url 'compare_cars' car_info.id similar_car.id %}" class="btn btn-primary">Select</a></td>
-                <td>{{ car_info.model_year }}</td>
-                <td>{{ car_info.make }}</td>
-                <td>{{ car_info.car_model }}</td>
-                <td>{{ car_info.vehicle_class }}</td>
-                <td>{{ car_info.engine_size }}</td>
-                <td>{{ car_info.cylinders }}</td>
-                <td>{{ car_info.transmission }}</td>
-                <td>{{ car_info.fuel_type }}</td>
-                <td>{{ car_info.city }}</td>
-                <td>{{ car_info.highway }}</td>
-                <td>{{ car_info.combined }}</td>
-                <td>{{ car_info.combined_mpg }}</td>
-                <td>{{ car_info.CO2_Emission }}</td>
-                <td>{{ car_info.CO2_Rating }}</td>
-                <td>{{ car_info.smog_rating }}</td>
-                <td>{{ car_info.motor }}</td>
-                <td>{{ car_info.city_kWh }}</td>
-                <td>{{ car_info.highway_kWh }}</td>
-                <td>{{ car_info.combined_kWh }}</td>
-                <td>{{ car_info.range }}</td>
-                <td>{{ car_info.recharge_time }}</td>
-                <td>{{ car_info.fuel_type2 }}</td>
-                <td>{{ car_info.range2 }}</td>
-                <td>{{ car_info.combined_PHEV }}</td>
-                <td>{{ car_info.vehicle_type }}</td>
+                <td>{{ similar_car.model_year }}</td>
+                <td>{{ similar_car.make }}</td>
+                <td>{{ similar_car.car_model }}</td>
+                <td>{{ similar_car.vehicle_class }}</td>
+                <td>{{ similar_car.engine_size }}</td>
+                <td>{{ similar_car.cylinders }}</td>
+                <td>{{ similar_car.transmission }}</td>
+                <td>{{ similar_car.fuel_type }}</td>
+                <td>{{ similar_car.city }}</td>
+                <td>{{ similar_car.highway }}</td>
+                <td>{{ similar_car.combined }}</td>
+                <td>{{ similar_car.combined_mpg }}</td>
+                <td>{{ similar_car.CO2_Emission }}</td>
+                <td>{{ similar_car.CO2_Rating }}</td>
+                <td>{{ similar_car.smog_rating }}</td>
+                <td>{{ similar_car.motor }}</td>
+                <td>{{ similar_car.city_kWh }}</td>
+                <td>{{ similar_car.highway_kWh }}</td>
+                <td>{{ similar_car.combined_kWh }}</td>
+                <td>{{ similar_car.range }}</td>
+                <td>{{ similar_car.recharge_time }}</td>
+                <td>{{ similar_car.fuel_type2 }}</td>
+                <td>{{ similar_car.range2 }}</td>
+                <td>{{ similar_car.combined_PHEV }}</td>
+                <td>{{ similar_car.vehicle_type }}</td>
                 <!-- Add other fields as needed -->
             </tr>
             {% endfor %}

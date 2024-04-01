@@ -244,10 +244,15 @@ def car_details(request, car_id):
 
     similar_cars = recommend_similar_cars(df, transformer, car_id)
 
-    # print(similar_cars)
+    print(similar_cars)
     id_list = [car[0] for car in similar_cars]
     # print(id_list)
     similar_cars = CarInfoModel.objects.filter(id__in=id_list)
+    # print('-'*30)
+    # for row in similar_cars:
+    #     print(row)
+    # print('-'*30)
+
 
     return render(request, 'datamining/car_details.html', {'car_info': car_info, 'similar_cars': similar_cars})
 
